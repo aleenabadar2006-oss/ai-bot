@@ -297,4 +297,4 @@ def chatbot_page():
 if st.session_state.logged_in:
     chatbot_page()
 else:
-    login_page() add a demo login button and the username and pass of demo login be already filled in the boxes
+    login_page() 
