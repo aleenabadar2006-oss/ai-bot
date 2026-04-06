@@ -322,4 +322,4 @@ def chatbot_page():
 if st.session_state.logged_in:
     chatbot_page()
 else:
-    login_page() now tell me how to connect this code with ollama
+    login_page() 
