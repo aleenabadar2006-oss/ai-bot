@@ -4,8 +4,8 @@ import streamlit as st
 # Page Config
 # -----------------------------
 st.set_page_config(
-    page_title="AI Bot",
-    page_icon="🤖",
+    page_title="Wasay Kuchu Puchu",
+    page_icon="💜",
     layout="wide"
 )
 
@@ -41,7 +41,7 @@ st.markdown("""
     .login-title {
         text-align: center;
         color: #ddd6fe;
-        font-size: 2rem;
+        font-size: 2.2rem;
         font-weight: 700;
         margin-bottom: 5px;
     }
@@ -168,14 +168,26 @@ def login_page():
 
     with col2:
         st.markdown('<div class="custom-card">', unsafe_allow_html=True)
-        st.markdown('<div class="login-title">🤖 AI Bot Login</div>', unsafe_allow_html=True)
-        st.markdown('<div class="login-subtitle">Secure access to your intelligent assistant</div>', unsafe_allow_html=True)
+        st.markdown('<div class="login-title">💜 Wasay Kuchu Puchu</div>', unsafe_allow_html=True)
+        st.markdown('<div class="login-subtitle">Your cute AI assistant is waiting ✨</div>', unsafe_allow_html=True)
 
-        username = st.text_input("Username", placeholder="Enter username")
-        password = st.text_input("Password", type="password", placeholder="Enter password")
+        # Pre-filled demo credentials
+        username = st.text_input(
+            "Username",
+            value="admin",
+            placeholder="Enter username"
+        )
+
+        password = st.text_input(
+            "Password",
+            value="password123",
+            type="password",
+            placeholder="Enter password"
+        )
 
         st.markdown("<br>", unsafe_allow_html=True)
 
+        # Normal Login Button
         if st.button("Login", use_container_width=True):
             if username == VALID_USERNAME and password == VALID_PASSWORD:
                 st.session_state.logged_in = True
@@ -184,12 +196,21 @@ def login_page():
             else:
                 st.error("❌ Invalid username or password")
 
-        # Demo login credentials
+        st.markdown("<br>", unsafe_allow_html=True)
+
+        # Demo Login Button
+        if st.button("🚀 Demo Login", use_container_width=True):
+            st.session_state.logged_in = True
+            st.session_state.username = VALID_USERNAME
+            st.rerun()
+
+        # Demo Info Box
         st.markdown("""
         <div class="demo-box">
-            <h4 style="color:#ddd6fe; margin-bottom:10px;">🔐 Demo Login</h4>
+            <h4 style="color:#ddd6fe; margin-bottom:10px;">🔐 Demo Login Ready</h4>
             <p style="color:#c4b5fd; margin:0;"><b>Username:</b> admin</p>
             <p style="color:#c4b5fd; margin:0;"><b>Password:</b> password123</p>
+            <p style="color:#c4b5fd; margin-top:10px;">You can press <b>Login</b> or simply click <b>Demo Login</b>.</p>
         </div>
         """, unsafe_allow_html=True)
 
@@ -203,7 +224,7 @@ def chatbot_page():
     col1, col2 = st.columns([10, 1])
 
     with col1:
-        st.markdown(f"<h1>🤖 AI Bot</h1>", unsafe_allow_html=True)
+        st.markdown(f"<h1>💜 Wasay Kuchu Puchu</h1>", unsafe_allow_html=True)
         st.markdown(f"<p class='muted-text'>Welcome back, <b>{st.session_state.username}</b> 👋</p>", unsafe_allow_html=True)
 
     with col2:
@@ -256,7 +277,7 @@ def chatbot_page():
             with st.chat_message("user"):
                 st.markdown(user_input)
 
-            # Dummy response (replace later with LLM)
+            # Dummy response
             bot_reply = f"✨ You said: **{user_input}**"
 
             with st.chat_message("assistant"):
@@ -297,4 +318,4 @@ def chatbot_page():
 if st.session_state.logged_in:
     chatbot_page()
 else:
-    login_page() 
+    login_page()
