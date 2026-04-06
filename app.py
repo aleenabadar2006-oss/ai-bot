@@ -4,7 +4,7 @@ import streamlit as st
 # Page Config
 # -----------------------------
 st.set_page_config(
-    page_title="WASAY KUCHU PUCHU BOT",
+    page_title="AI Bot",
     page_icon="🤖",
     layout="wide"
 )
@@ -297,4 +297,4 @@ def chatbot_page():
 if st.session_state.logged_in:
     chatbot_page()
 else:
-    login_page() 
+    login_page() add a demo login button and the username and pass of demo login be already filled in the boxes
