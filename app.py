@@ -1,4 +1,5 @@
 import streamlit as st
+import requests
 
 # -----------------------------
 # Page Config
@@ -160,11 +161,33 @@ VALID_USERNAME = "admin"
 VALID_PASSWORD = "password123"
 
 # -----------------------------
+# Ollama API Function
+# -----------------------------
+def query_ollama(messages, model="tinyllama", temperature=0.7):
+    url = "http://localhost:11434/api/chat"
+
+    payload = {
+        "model": model,
+        "messages": messages,
+        "stream": False,
+        "options": {
+            "temperature": temperature
+        }
+    }
+
+    response = requests.post(url, json=payload)
+
+    if response.status_code == 200:
+        data = response.json()
+        return data["message"]["content"]
+    else:
+        raise Exception(f"HTTP {response.status_code}: {response.text}")
+
+# -----------------------------
 # Login Page
 # -----------------------------
 def login_page():
     st.markdown("<br><br>", unsafe_allow_html=True)
-
     col1, col2, col3 = st.columns([1.2, 1.2, 1.2])
 
     with col2:
@@ -172,23 +195,11 @@ def login_page():
         st.markdown('<div class="login-title">💜 AI Bot</div>', unsafe_allow_html=True)
         st.markdown('<div class="login-subtitle">Your intelligent assistant is waiting ✨</div>', unsafe_allow_html=True)
 
-        # Pre-filled demo credentials
-        username = st.text_input(
-            "Username",
-            value="admin",
-            placeholder="Enter username"
-        )
-
-        password = st.text_input(
-            "Password",
-            value="password123",
-            type="password",
-            placeholder="Enter password"
-        )
+        username = st.text_input("Username", value="admin", placeholder="Enter username")
+        password = st.text_input("Password", value="password123", type="password", placeholder="Enter password")
 
         st.markdown("<br>", unsafe_allow_html=True)
 
-        # Normal Login Button
         if st.button("Login", use_container_width=True):
             if username == VALID_USERNAME and password == VALID_PASSWORD:
                 st.session_state.logged_in = True
@@ -197,24 +208,18 @@ def login_page():
             else:
                 st.error("❌ Invalid username or password")
 
-        st.markdown("<br>", unsafe_allow_html=True)
-
-        # Demo Login Button
         if st.button("🚀 Demo Login", use_container_width=True):
             st.session_state.logged_in = True
             st.session_state.username = VALID_USERNAME
             st.rerun()
 
-        # Demo Info Box
         st.markdown("""
         <div class="demo-box">
             <h4 style="color:#ddd6fe; margin-bottom:10px;">🔐 Demo Login Ready</h4>
             <p style="color:#c4b5fd; margin:0;"><b>Username:</b> admin</p>
             <p style="color:#c4b5fd; margin:0;"><b>Password:</b> password123</p>
-            <p style="color:#c4b5fd; margin-top:10px;">You can press <b>Login</b> or simply click <b>Demo Login</b>.</p>
         </div>
         """, unsafe_allow_html=True)
-
         st.markdown('</div>', unsafe_allow_html=True)
 
 # -----------------------------
@@ -245,59 +250,65 @@ def chatbot_page():
 
     st.sidebar.markdown("---")
 
-    model = st.sidebar.selectbox(
+    # Model Selection
+    selected_model = st.sidebar.selectbox(
         "Choose Model",
-        ["GPT-2", "Custom Model", "Offline LLM"]
+        ["tinyllama"]
     )
 
     temperature = st.sidebar.slider("Temperature", 0.0, 1.0, 0.7)
 
     st.sidebar.markdown("---")
-    st.sidebar.markdown(f"**Current Model:** `{model}`")
+    st.sidebar.markdown(f"**Current Model:** `{selected_model}`")
     st.sidebar.markdown(f"**Creativity Level:** `{temperature:.1f}`")
 
     # Main Layout
-    col1, col2 = st.columns([2.2, 1])
+    chat_col, hist_col = st.columns([2.2, 1])
 
     # Chat Area
-    with col1:
+    with chat_col:
         st.markdown("### 💬 Chat Window")
 
+        # Display history
         for msg in st.session_state.messages:
             with st.chat_message(msg["role"]):
                 st.markdown(msg["content"])
 
+        # User input
         user_input = st.chat_input("Type your message here...")
 
         if user_input:
-            st.session_state.messages.append({
-                "role": "user",
-                "content": user_input
-            })
+            # Store user message
+            st.session_state.messages.append({"role": "user", "content": user_input})
 
             with st.chat_message("user"):
                 st.markdown(user_input)
 
-            # Dummy response (replace later with Ollama / LLM)
-            bot_reply = f"✨ You said: **{user_input}**"
-
+            # Call Ollama with full history
             with st.chat_message("assistant"):
-                st.markdown(bot_reply)
+                with st.spinner("Generating response..."):
+                    try:
+                        bot_reply = query_ollama(
+                            messages=st.session_state.messages,
+                            model=selected_model,
+                            temperature=temperature
+                        )
 
-            st.session_state.messages.append({
-                "role": "assistant",
-                "content": bot_reply
-            })
+                        st.markdown(bot_reply)
+
+                        # Store assistant message
+                        st.session_state.messages.append({"role": "assistant", "content": bot_reply})
+                        st.rerun()
+
+                    except Exception as e:
+                        st.error(f"Ollama Error: {e}. Make sure Ollama is running!")
 
     # History Panel
-    with col2:
-        st.markdown("### 🕘 Conversation History")
+    with hist_col:
+        st.markdown("### 🕘 History")
 
         if not st.session_state.messages:
-            st.markdown(
-                '<div class="history-box"><p class="muted-text">No conversation yet.</p></div>',
-                unsafe_allow_html=True
-            )
+            st.markdown('<div class="history-box"><p class="muted-text">No conversation yet.</p></div>', unsafe_allow_html=True)
         else:
             for i, msg in enumerate(st.session_state.messages):
                 role_icon = "🧑" if msg["role"] == "user" else "🤖"
@@ -312,8 +323,7 @@ def chatbot_page():
         st.divider()
         st.markdown("### ℹ️ Status")
         st.markdown('<div class="status-badge">✅ UI Active</div>', unsafe_allow_html=True)
-        st.markdown("<br><br>", unsafe_allow_html=True)
-        st.markdown(f"**Messages:** `{len(st.session_state.messages)}`")
+        st.markdown(f"<br>**Messages:** `{len(st.session_state.messages)}`", unsafe_allow_html=True)
         st.markdown(f"**Logged in as:** `{st.session_state.username}`")
 
 # -----------------------------
@@ -322,4 +332,4 @@ def chatbot_page():
 if st.session_state.logged_in:
     chatbot_page()
 else:
-    login_page() 
+    login_page()
