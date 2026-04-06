@@ -4,7 +4,7 @@ import streamlit as st
 # Page Config
 # -----------------------------
 st.set_page_config(
-    page_title="Wasay Kuchu Puchu",
+    page_title="AI Bot",
     page_icon="💜",
     layout="wide"
 )
@@ -55,7 +55,8 @@ st.markdown("""
 
     /* Inputs */
     .stTextInput > div > div > input,
-    .stChatInput > div > div > input {
+    .stChatInput > div > div > textarea,
+    .stChatInput input {
         background-color: rgba(42, 42, 78, 0.95) !important;
         color: #f3e8ff !important;
         border: 1px solid #7c3aed !important;
@@ -168,8 +169,8 @@ def login_page():
 
     with col2:
         st.markdown('<div class="custom-card">', unsafe_allow_html=True)
-        st.markdown('<div class="login-title">💜 Wasay Kuchu Puchu</div>', unsafe_allow_html=True)
-        st.markdown('<div class="login-subtitle">Your cute AI assistant is waiting ✨</div>', unsafe_allow_html=True)
+        st.markdown('<div class="login-title">💜 AI Bot</div>', unsafe_allow_html=True)
+        st.markdown('<div class="login-subtitle">Your intelligent assistant is waiting ✨</div>', unsafe_allow_html=True)
 
         # Pre-filled demo credentials
         username = st.text_input(
@@ -224,7 +225,7 @@ def chatbot_page():
     col1, col2 = st.columns([10, 1])
 
     with col1:
-        st.markdown(f"<h1>💜 Wasay Kuchu Puchu</h1>", unsafe_allow_html=True)
+        st.markdown(f"<h1>💜 AI Bot</h1>", unsafe_allow_html=True)
         st.markdown(f"<p class='muted-text'>Welcome back, <b>{st.session_state.username}</b> 👋</p>", unsafe_allow_html=True)
 
     with col2:
@@ -277,7 +278,7 @@ def chatbot_page():
             with st.chat_message("user"):
                 st.markdown(user_input)
 
-            # Dummy response
+            # Dummy response (replace later with Ollama / LLM)
             bot_reply = f"✨ You said: **{user_input}**"
 
             with st.chat_message("assistant"):
@@ -293,7 +294,10 @@ def chatbot_page():
         st.markdown("### 🕘 Conversation History")
 
         if not st.session_state.messages:
-            st.markdown('<div class="history-box"><p class="muted-text">No conversation yet.</p></div>', unsafe_allow_html=True)
+            st.markdown(
+                '<div class="history-box"><p class="muted-text">No conversation yet.</p></div>',
+                unsafe_allow_html=True
+            )
         else:
             for i, msg in enumerate(st.session_state.messages):
                 role_icon = "🧑" if msg["role"] == "user" else "🤖"
@@ -318,4 +322,4 @@ def chatbot_page():
 if st.session_state.logged_in:
     chatbot_page()
 else:
-    login_page()
+    login_page() now tell me how to connect this code with ollama
